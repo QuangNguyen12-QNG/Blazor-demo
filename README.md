@@ -9,5 +9,5 @@
 
 2.mở Terminal và chạy:
 - git clone https://github.com/QuangNguyen12-QNG/Blazor-demo.git
-- cd "ClothingStore"
+- cd "blazor-demo"
 - dotnet run 
