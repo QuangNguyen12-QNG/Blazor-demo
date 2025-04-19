@@ -6,7 +6,7 @@
 - Install và đợi quá trình cài đặt hoàn tất.
 - Mở Command Prompt (CMD) hoặc PowerShell :dotnet --version
 - Hiển thị 8.0.x là đã cài thành công.
-- 2.Mở Terminal và chạy:
+2.Mở Terminal và chạy:
 - git clone https://github.com/QuangNguyen12-QNG/Blazor-demo.git
 - cd "ClothingStore"
 - dotnet run 
