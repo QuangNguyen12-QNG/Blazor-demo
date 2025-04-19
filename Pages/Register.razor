@@ -1,0 +1,55 @@
+@page "/register"
+@using ClothingStore.Models
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+
+<h3 class="text-center my-4">Đăng ký tài khoản</h3>
+
+<div class="d-flex justify-content-center">
+    <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
+        <EditForm Model="@NewUser" OnValidSubmit="HandleRegister">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label class="form-label">Tên đăng nhập</label>
+                <InputText @bind-Value="NewUser.Username" class="form-control" />
+                <ValidationMessage For="@(() => NewUser.Username)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Mật khẩu</label>
+                <InputText @bind-Value="NewUser.Password" type="password" class="form-control" />
+                <ValidationMessage For="@(() => NewUser.Password)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Xác nhận mật khẩu</label>
+                <InputText @bind-Value="NewUser.ConfirmPassword" type="password" class="form-control" />
+                <ValidationMessage For="@(() => NewUser.ConfirmPassword)" />
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Đăng ký</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private UserRegister NewUser = new();
+
+    private async Task HandleRegister()
+    {
+        if (NewUser.Password != NewUser.ConfirmPassword)
+        {
+            // Có thể hiển thị thông báo tại đây nếu cần
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("sessionStorage.setItem", "username", NewUser.Username);
+            await JS.InvokeVoidAsync("sessionStorage.setItem", "password", NewUser.Password);
+            NavigationManager.NavigateTo("/login");
+        }
+    }
+}

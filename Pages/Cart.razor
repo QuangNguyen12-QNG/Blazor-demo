@@ -1,0 +1,124 @@
+@page "/cart"
+@using ClothingStore.Models
+@using ClothingStore.Services
+@inject CartService CartService
+@inject OrderService OrderService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+
+<h3 class="text-center my-4">Giỏ hàng của bạn</h3>
+
+<div class="container">
+    @if (cartItems.Any())
+    {
+        <div class="row">
+            @foreach (var product in cartItems)
+            {
+                <div class="col-md-4">
+                    <div class="card mb-3 shadow-sm">
+                        <img src="@product.Image" class="card-img-top" alt="product image">
+                        <div class="card-body">
+                            <h5 class="card-title">@product.Name</h5>
+                            <p class="card-text">@product.Price.ToString("N0") VNĐ</p>
+                            <button class="btn btn-danger" @onclick="() => RemoveFromCart(product)">Xóa</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="text-center mt-4">
+            <button class="btn btn-success" @onclick="Checkout">Thanh toán</button>
+        </div>
+
+        @if (showCheckoutSummary)
+        {
+            <div class="modal-overlay">
+                <div class="modal-content card mt-4 shadow-lg">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <strong>Thông tin đơn hàng</strong>
+                        <button class="btn-close" aria-label="Close" @onclick="CloseCheckout"></button>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group mb-3">
+                            @foreach (var item in cartItems)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    @item.Name
+                                    <span>@item.Price.ToString("N0") VNĐ</span>
+                                </li>
+                            }
+                        </ul>
+                        <div class="text-end">
+                            <strong>Tổng cộng: @GetTotalPrice()</strong>
+                        </div>
+
+                        <div class="mt-4 text-center">
+                            <button class="btn btn-primary btn-lg" @onclick="ConfirmCheckout">Đồng ý thanh toán</button>
+                            <button class="btn btn-secondary btn-lg" @onclick="CloseCheckout">Đóng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-center">Giỏ hàng của bạn trống.</p>
+    }
+</div>
+
+@code {
+    private List<Product> cartItems = new();
+    private bool showCheckoutSummary = false;
+
+    protected override void OnInitialized()
+    {
+        cartItems = CartService.GetCartItems();
+    }
+
+    private void RemoveFromCart(Product product)
+    {
+        CartService.RemoveFromCart(product);
+        cartItems = CartService.GetCartItems();
+    }
+
+    private void Checkout()
+    {
+        showCheckoutSummary = true;
+    }
+
+    private void CloseCheckout()
+    {
+        showCheckoutSummary = false;
+    }
+
+    private async Task ConfirmCheckout()
+    {
+        var order = new Order
+    {
+          OrderId = Guid.NewGuid().ToString(),
+        OrderDate = DateTime.Now,
+        TotalAmount = cartItems.Sum(item => Convert.ToDecimal(item.Price)),  // Chuyển đổi Price thành decimal
+        Status = "Đang xử lý"
+    };
+    
+    // Lưu thông tin đơn hàng vào sessionStorage
+    var orderJson = System.Text.Json.JsonSerializer.Serialize(order);
+    await JS.InvokeVoidAsync("sessionStorage.setItem", "order", orderJson);
+    
+    // Xóa giỏ hàng sau khi thanh toán
+    CartService.ClearCart();
+    cartItems = CartService.GetCartItems();
+    showCheckoutSummary = false;
+
+    // Chuyển hướng đến trang Đơn hàng
+    NavigationManager.NavigateTo("/order");
+    }
+
+    private string GetTotalPrice()
+    {
+        var total = cartItems.Sum(item => item.Price);
+        return total.ToString("N0") + " VNĐ";
+    }
+}

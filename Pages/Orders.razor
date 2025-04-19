@@ -1,0 +1,39 @@
+@page "/order"
+@using ClothingStore.Models
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+<PageTitle>Đơn hàng của tôi</PageTitle>
+
+@code {
+    public Order order { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Lấy thông tin đơn hàng từ sessionStorage
+        var orderJson = await JS.InvokeAsync<string>("sessionStorage.getItem", "order");
+
+        if (!string.IsNullOrEmpty(orderJson))
+        {
+            // Deserialize thông tin đơn hàng từ session thành đối tượng Order
+            order = System.Text.Json.JsonSerializer.Deserialize<Order>(orderJson);
+        }
+    }
+}
+
+@if (order != null)
+{
+    <div class="orders-container container mt-4">
+        <h2 class="text-center mb-4">Thông tin đơn hàng</h2>
+
+        <div class="order-card mb-3 p-3 border rounded shadow-sm" style="background-color: #fdfdfd;">
+            <p><strong>Tổng tiền:</strong> @order.TotalAmount.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</p>
+            <p><strong>Ngày đặt:</strong> @order.OrderDate.ToString("dd/MM/yyyy")</p>
+            <p><strong>Trạng thái:</strong> @order.Status</p>
+        </div>
+    </div>
+}
+else
+{
+    <p class="text-center">Không có đơn hàng nào để hiển thị.</p>
+}

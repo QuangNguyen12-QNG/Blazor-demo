@@ -1,0 +1,66 @@
+﻿@page "/products"
+@using ClothingStore.Models
+@using ClothingStore.Services
+@inject CartService CartService
+
+<h3 class="text-center my-4">🛍️ Danh sách sản phẩm</h3>
+<div class="container">
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+        @foreach (var product in products)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <img src="@product.Image" class="card-img-top" alt="product image">
+                    <div class="card-body">
+                        <h5 class="card-title">@product.Name</h5>
+                        <p class="card-text">@product.Price.ToString("N0") VNĐ</p>
+                        <button class="btn btn-primary w-100" @onclick="() => AddToCart(product)">Thêm vào giỏ hàng</button>
+                        @if (addedProductId == product.Id && !string.IsNullOrEmpty(successMessage))
+                        {
+                            <div class="alert alert-success text-white py-1 px-2 mb-2" 
+                                style="background-color: #28a745; font-size: 0.85rem; border-radius: 6px;">
+                                @successMessage
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+ 
+
+</div>
+
+@code {
+    private List<Product> products = new List<Product>
+    {
+        new Product { Id = 1, Name = "T-Shirt", Price = 200000, Image = "image/awet001-2l-1.webp" },
+        new Product { Id = 2, Name = "Jeans", Price = 249000, Image = "image/quan-tay-sidetab-hai-ben1.jpg" },
+        new Product { Id = 3, Name = "Tây đen", Price = 189000, Image = "image/quan-tay-sidetab-hai-ben1.jpg" },
+        new Product { Id = 4, Name = "áo Khoác dạ", Price = 199999, Image = "image/awet001-2l-1.webp" },
+        new Product { Id = 5, Name = "Quần bò", Price = 249999, Image = "image/quan-tay-sidetab-hai-ben1.jpg" },
+        new Product { Id = 6, Name = "Quần Tây ", Price = 199999, Image = "image/quan-tay-sidetab-hai-ben1.jpg" },
+        new Product { Id = 7, Name = "T-Shirt", Price = 199999, Image = "image/awet001-2l-1.webp" },
+        new Product { Id = 8, Name = "Jeans Hàn Quốc ", Price = 249999, Image = "image/quan-tay-sidetab-hai-ben1.jpg" },
+        new Product { Id = 9, Name = "Tây đen loại 2", Price = 199999, Image = "image/quan-tay-sidetab-hai-ben1.jpg" }
+    };
+
+    private string successMessage;
+    private int? addedProductId = null;
+    // Đảm bảo AddToCart là một phương thức async
+    private async Task AddToCart(Product product)
+    {
+        CartService.AddToCart(product);
+        successMessage = $"✔️ Đã thêm {product.Name}!";
+        addedProductId = product.Id;
+
+        StateHasChanged(); // Cập nhật ngay
+
+        await Task.Delay(3000);
+
+        successMessage = string.Empty;
+        addedProductId = null;
+        StateHasChanged(); // Cập nhật để ẩn
+    }
+}
